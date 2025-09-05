@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: staff-table-001
+      author: pavan
+      changes:
+        - createTable:
+            tableName: staff
+            columns:
+              - column:
+                  name: id
+                  type: CHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: role
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValue: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: department
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                    name: city_id
+                    type: CHAR(36)
+                    constraints:
+                        nullable: true
+              - column:
+                    name: village_id
+                    type: CHAR(36)
+                    constraints:
+                        nullable: true
+              - column:
+                  name: etag
+                  type: BIGINT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
