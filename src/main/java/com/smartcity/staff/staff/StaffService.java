@@ -121,7 +121,7 @@ public class StaffService {
         UpdateHelper.updateIfNotNull(staffEntity::setDepartment, admin.getDepartment());
         UpdateHelper.updateIfNotNull(staffEntity::setName, admin.getName());
         UpdateHelper.updateIfNotNull(staffEntity::setEmail, admin.getEmail());
-        UpdateHelper.updateIfNotNull(staffEntity::setActive, admin.getActive());
+//        UpdateHelper.updateIfNotNull(staffEntity::setActive, admin.getActive());
         return staffRepository.save(staffEntity);
     }
 
