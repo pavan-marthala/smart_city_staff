@@ -23,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "staff")
-public class StaffEntity implements UserDetails {
+public class StaffEntity {
     @Id
     @Column("id")
     private String id;
@@ -31,14 +31,8 @@ public class StaffEntity implements UserDetails {
     private String name;
     @Column("email")
     private String email;
-    @Column("password")
-    private String password;
-    @Column("role")
-    private String role;
     @Column("department")
     private String department;
-    @Column("is_active")
-    private boolean isActive;
     @Column("city_id")
     private String cityId;
     @Column("village_id")
@@ -53,21 +47,4 @@ public class StaffEntity implements UserDetails {
     @Column("etag")
     private Long etag;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(this.role.split(",")).map(SimpleGrantedAuthority::new).toList();
-    }
-    public List<String> getRoles() {
-        return Arrays.stream(this.role.split(",")).toList();
-    }
-
-    @Override
-    public String getUsername() {
-        return this.id;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.isActive;
-    }
 }

@@ -26,14 +26,12 @@ import java.util.UUID;
 public class StaffService {
     private final StaffRepository staffRepository;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
-    private final PasswordEncoder passwordEncoder;
     private final WebClient webClient;
 
     public StaffService(WebClient.Builder webClientBuilder, StaffRepository staffRepository, R2dbcEntityTemplate r2dbcEntityTemplate, PasswordEncoder passwordEncoder,Environment environment) {
         this.webClient = webClientBuilder.baseUrl(Objects.requireNonNull(environment.getProperty("smart_city.services.location-service.url"))).build();
         this.staffRepository = staffRepository;
         this.r2dbcEntityTemplate = r2dbcEntityTemplate;
-        this.passwordEncoder = passwordEncoder;
     }
 
     private Mono<Village> getVillageById(String id) {
@@ -85,11 +83,11 @@ public class StaffService {
                 .switchIfEmpty(Mono.error(new RuntimeException("Staff not found")));
     }
 
-    public Mono<String> create(StaffRequest admin) {
-        log.info("Creating new staff with email: {}", admin.getEmail());
-        return staffRepository.findByEmail(admin.getEmail())
-                .flatMap(existingUser -> Mono.error(new RuntimeException("Staff with email: " + admin.getEmail() + " already exists")))
-                .switchIfEmpty(Mono.defer(() -> validateVillageAndCity(admin)))
+    public Mono<String> create(StaffRequest staffRequest) {
+        log.info("Creating new staff with email: {}", staffRequest.getEmail());
+        return staffRepository.findByEmail(staffRequest.getEmail())
+                .flatMap(existingUser -> Mono.error(new RuntimeException("Staff with email: " + staffRequest.getEmail() + " already exists")))
+                .switchIfEmpty(Mono.defer(() -> validateVillageAndCity(staffRequest)))
                 .cast(StaffEntity.class)
                 .map(StaffEntity::getId);
     }
@@ -107,21 +105,23 @@ public class StaffService {
                 });
     }
 
-    private Mono<StaffEntity> createStaff(StaffRequest admin) {
-        StaffEntity staffEntity = StaffEntity.builder().id(UUID.randomUUID().toString()).name(admin.getName()).email(admin.getEmail()).password(passwordEncoder.encode(admin.getPassword())).role("STAFF").isActive(true).department(admin.getDepartment()).cityId(admin.getCityId().toString()).villageId(admin.getVillageId().toString()).build();
+    private Mono<StaffEntity> createStaff(StaffRequest staffRequest) {
+        assert staffRequest.getCityId() != null;
+        assert staffRequest.getId() != null;
+        assert staffRequest.getVillageId() != null;
+        StaffEntity staffEntity = StaffEntity.builder().id(staffRequest.getId().toString()).name(staffRequest.getName()).email(staffRequest.getEmail()).department(staffRequest.getDepartment()).cityId(staffRequest.getCityId().toString()).villageId(staffRequest.getVillageId().toString()).build();
         return r2dbcEntityTemplate.insert(StaffEntity.class).using(staffEntity);
     }
 
-    public Mono<Void> update(Staff admin) {
-        log.info("Updating staff with id: {}", admin.getId());
-        return ReactiveSecurityContextHolder.getContext().map(securityContext -> securityContext.getAuthentication().getName()).flatMap(staffRepository::findById).switchIfEmpty(Mono.error(new ResourceNotFoundException("staff not found with id: " + admin.getId()))).flatMap(staffEntity -> updateStaff(admin, staffEntity)).then();
+    public Mono<Void> update(Staff staff) {
+        log.info("Updating staff with id: {}", staff.getId());
+        return ReactiveSecurityContextHolder.getContext().map(securityContext -> securityContext.getAuthentication().getName()).flatMap(staffRepository::findById).switchIfEmpty(Mono.error(new ResourceNotFoundException("staff not found with id: " + staff.getId()))).flatMap(staffEntity -> updateStaff(staff, staffEntity)).then();
     }
 
-    private Mono<StaffEntity> updateStaff(Staff admin, StaffEntity staffEntity) {
-        UpdateHelper.updateIfNotNull(staffEntity::setDepartment, admin.getDepartment());
-        UpdateHelper.updateIfNotNull(staffEntity::setName, admin.getName());
-        UpdateHelper.updateIfNotNull(staffEntity::setEmail, admin.getEmail());
-//        UpdateHelper.updateIfNotNull(staffEntity::setActive, admin.getActive());
+    private Mono<StaffEntity> updateStaff(Staff staff, StaffEntity staffEntity) {
+        UpdateHelper.updateIfNotNull(staffEntity::setDepartment, staff.getDepartment());
+        UpdateHelper.updateIfNotNull(staffEntity::setName, staff.getName());
+        UpdateHelper.updateIfNotNull(staffEntity::setEmail, staff.getEmail());
         return staffRepository.save(staffEntity);
     }
 

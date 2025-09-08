@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 public interface StaffMapper {
     public static StaffMapper INSTANCE = Mappers.getMapper(StaffMapper.class);
     StaffEntity toEntity(StaffRequest staffRequest);
-    @Mapping(target = "role",expression = "java(staffEntity.getRoles())")
+//    @Mapping(target = "role",expression = "java(staffEntity.getRoles())")
     @Mapping(source = "village", target = "village")
     @Mapping(source = "city", target = "city")
     @Mapping(source = "staffEntity.id", target = "id")

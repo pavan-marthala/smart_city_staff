@@ -26,14 +26,13 @@ public class StaffController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasAuthority('STAFF')")
+    @PreAuthorize("hasAuthority('STAFF') or hasAuthority('SYSTEM')")
     public Mono<Staff> get() {
         log.info("Fetching staff details");
         return staffService.get();
     }
-
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SYSTEM')")
     public Mono<ResponseEntity<String>> create(@Valid @RequestBody StaffRequest staffRequest) {
         log.info("Creating new staff");
         return staffService.create(staffRequest)
